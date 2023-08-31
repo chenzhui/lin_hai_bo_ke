@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.Dao.UserDao">
+
+    <insert id="AddUser">
+        insert into usr(id,name,phone,password,avatar) values (0,#{name},#{phone},#{password},'default.png')
+    </insert>
+    <select id="HasPhone" resultType="int">
+        select count(phone) as amount from usr where phone=#{phone}
+    </select>
+    <select id="SearchId" resultType="int">
+        select ifnull((select id from usr where phone=#{phone}),0)
+    </select>
+    <select id="SearchPasswordById" resultType="String">
+        select password from usr where id=#{id}
+    </select>
+    <select id="SearchPassword" resultType="String">
+        select password from usr where phone=#{phone}
+    </select>
+    <select id="GetUser" resultType="com.example.Entity.User">
+        select * from usr where phone=#{phone} and password=#{password}
+    </select>
+    <select id="GetName" resultType="String">
+        select name from usr where id=#{id}
+    </select>
+    <select id="GetAvatar" resultType="String">
+        select avatar from usr where id=#{id}
+    </select>
+    <update id="ChangeName">
+        update usr set name=#{name} where id=#{id}
+    </update>
+    <update id="ChangePassword">
+        update usr set password=#{password} where id=#{id}
+    </update>
+    <update id="ChangeAvatar">
+        update usr set avatar=#{avatar} where id=#{id}
+    </update>
+    <select id="SelectAllUsers" resultType="com.example.Entity.User">
+        select * from usr
+    </select>
+
+
+    <insert id="AddBlog">
+        insert into blog(blogId,authorId,title,content,birthTime,liked,type,authorName) values (0,#{authorId},#{title},#{content},now(),0,#{type},#{authorName})
+    </insert>
+    <select id="GetAllBlogs" resultType="com.example.Entity.Blog">
+        select blogId,authorId,title,birthTime,type,authorName from blog order by liked desc
+    </select>
+    <select id="GetBlog" resultType="com.example.Entity.Blog">
+        select blogId,authorId,title,content,birthTime,liked,type from blog where blogId=#{blogId}
+    </select>
+    <select id="GetOwnerBlogs" resultType="com.example.Entity.Blog">
+        select blogId,authorId,title,content,birthTime,liked,type from blog where authorId=#{authorId}
+    </select>
+    <select id="GetOwnerTypeBlogs" resultType="com.example.Entity.Blog">
+        select blogId,authorId,title,content,birthTime,liked,type from blog where authorId=#{authorId} and type=#{type}
+    </select>
+    <select id="GetTypeBlogs" resultType="com.example.Entity.Blog">
+        select blogId,authorId,authorName,title,birthTime,liked,type from blog where type=#{type} order by liked desc
+    </select>
+    <select id="SelectSimilarBlogs" resultType="com.example.Entity.Blog">
+        select blogId,authorId,authorName,title,birthTime,liked,type from blog where title regexp #{search} order by liked desc
+    </select>
+    <select id="SelectIntBlogs" resultType="com.example.Entity.Blog">
+        select blogId,authorId,authorName,title,birthTime,liked,type from blog where blogId=#{search}
+    </select>
+    <select id="SelectAuthorById" resultType="int">
+        select authorId from blog where blogId=#{blogId}
+    </select>
+    <update id="FixBlog">
+        update blog set title=#{title},type=#{type},content=#{content},birthTime=now() where blogId=#{blogId}
+    </update>
+    <update id="ChangeBlogsName">
+        update blog set authorName=#{authorName} where authorId=#{authorId}
+    </update>
+    <delete id="DeleteBlog">
+        delete from blog where blogId=#{blogId}
+    </delete>
+
+
+    <select id="HasBlogLike" resultType="int">
+        select count(*) as amount from bloglikeform where id=#{id} and blogId=#{blogId}
+    </select>
+    <insert id="LikeBlog">
+        insert into bloglikeform(id,blogId) values(#{id},#{blogId});
+    </insert>
+    <delete id="DislikeBlog">
+        delete from bloglikeform where id=#{id} and blogId=#{blogId}
+    </delete>
+    <update id="BlogLikeAdd">
+        update blog set liked=liked+1 where blogId=#{blogId}
+    </update>
+    <update id="BlogLikeReduce">
+        update blog set liked=liked-1 where blogId=#{blogId}
+    </update>
+
+
+    <insert id="AddComment">
+        insert into comment(cmtId,authorId,content,birthTime,liked,parentId,blogId,kids) values(0,#{authorId},#{content},now(),0,null,#{blogId},0)
+    </insert>
+    <insert id="AddChildComment">
+        insert into comment(cmtId,authorId,content,birthTime,liked,parentId,blogId,kids) values(0,#{authorId},#{content},now(),0,#{parentId},#{blogId},null)
+    </insert>
+    <update id="AddKids">
+        update comment set kids=kids+1 where cmtId=#{parentId}
+    </update>
+    <select id="GetComment" resultType="com.example.Entity.Comment">
+        select cmtId,id,content,birthTime,liked,blogId,kids from comment where parentId is null and blogId=#{blogId}
+    </select>
+    <select id="GetChildComment" resultType="com.example.Entity.Comment">
+        select cmtId,id,content,birthTime,liked,parentId,blogId from comment where parentId=#{parentId}
+    </select>
+    <select id='GetCommentByCmtId' resultType="com.example.Entity.Comment">
+        select * from comment where cmtId=#{cmtId}
+    </select>
+
+
+    <select id="HasCommentLike" resultType="int">
+        select count(*) as amount from commentlikeform where id=#{id} and cmtId=#{cmtId}
+    </select>
+    <insert id="LikeComment">
+        insert into commentlikeform(id,cmtId) values(#{id},#{cmtId})
+    </insert>
+    <delete id="DislikeComment">
+        delete from commentlikeform where id=#{id} and cmtId=#{cmtId}
+    </delete>
+    <update id="CommentLikeAdd">
+        update comment set liked=liked+1 where cmtId=#{cmtId}
+    </update>
+    <update id="CommentLikeReduce">
+        update comment set liked=liked-1 where cmtId=#{cmtId}
+    </update>
+
+
+    <insert id="AddWaitKey">
+        insert into key_wait(phone,startTime) values (#{phone},now())
+    </insert>
+    <select id="SearchWaitKey" resultType="int">
+        select ifnull((select now()-startTime from key_wait where phone=#{phone} order by startTime desc limit 1),0) as continueTime;
+    </select>
+
+
+    <insert id="InsertKind">
+        insert into type(tId,kind,birthTime) value (0,#{kind},now())
+    </insert>
+    <select id="SelectKinds" resultType="com.example.Entity.Type">
+        select * from type;
+    </select>
+    <delete id="DeleteKind">
+        delete from type where kind=#{kind}
+    </delete>
+
+
+    <insert id="InsertLetter">
+        insert into letter(letterId,smallId,bigId,happendTime,content,towardId) values(0,#{smallId},#{bigId},now(),#{content},#{towardId})
+    </insert>
+    <select id="SelectLetters" resultType="com.example.Entity.Letter">
+        select letterId,time,content,towardId from letter where smallId=#{smallId} and bigId=#{bigId}
+    </select>
+
+
+    <insert id="InsertCollection">
+        insert into collection(id,blogId) value (#{id},#{blogId})
+    </insert>
+    <delete id="DeleteCollection">
+        delete from collection where id=#{id} and blogId=#{blogId}
+    </delete>
+    <select id="SelectCollection" resultType="int">
+        select ifnull((select 1 from collection where id=#{id} and blogId=#{blogId}),0)
+    </select>
+    <select id="SelectCollectionsById" resultType="int">
+        select blogId from collection where id=#{id}
+    </select>
+
+
+</mapper>
