@@ -8,20 +8,19 @@ import javax.websocket.RemoteEndpoint;
 import javax.websocket.Session;
 
 public class WebSocketUtil {
-    public static final Map<String, Session> ONLINE_USER_SESSIONS = new ConcurrentHashMap<>();
+    public static final Map<Integer, Session> ONLINE_USER_SESSIONS = new ConcurrentHashMap<>();
 
     public static void sendMessage(Session session, String message) throws IOException {
-        if (session == null)
-            return;
+        if (session == null){return;}
         RemoteEndpoint.Basic basic = session.getBasicRemote();
-        if (basic == null)
-            return;
+        if (basic == null){return;}
         basic.sendText(message);
     }
 
     public static void sendAllMessage(String message) throws IOException {
         Collection<Session> sessions = ONLINE_USER_SESSIONS.values();
-        for (Session session : sessions)
+        for (Session session : sessions){
             sendMessage(session, message);
+        }
     }
 }

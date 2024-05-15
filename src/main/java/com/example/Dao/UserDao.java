@@ -78,11 +78,11 @@ public interface UserDao {
 
     int DislikeBlog(BlogLike blogLike);
 
-    int BlogLikeAdd(int blogId);
+    int AddBlogLike(int blogId);
 
     int BlogLikeReduce(int blogId);
 
-    int HasCommentLike(int id,int cmtId);
+    int HasCommentLike(int likerId,int cmtId);
 
     int LikeComment(CommentLike commentLike);
 
@@ -104,13 +104,18 @@ public interface UserDao {
 
     int InsertLetter(Letter letter);
 
-    List<Letter> SelectLetters(int smallId, int bigId);
-
+    List<Letter> SelectLetters(int id1, int id2);
+    List<Letter> SelectAllLetters(int towardId);
     int InsertCollection(Collection collection);
-
     int DeleteCollection(Collection collection);
 
     int SelectCollection(Collection collection);
 
     int[] SelectCollectionsById(int authorId);
+
+    int InsertFollow(int followerId,int followedId);
+
+    int[] SelectFollowed(int followerId);
+    int[] SelectFollower(int followedId);
+
 }

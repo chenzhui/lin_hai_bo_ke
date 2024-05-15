@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class Comment implements Serializable {
     private int cmtId;
 
-    private int id;
+    private int commentatorId;
 
     private String content;
 
@@ -41,13 +41,9 @@ public class Comment implements Serializable {
         this.cmtId = cmtId;
     }
 
-    public int getId() {
-        return id;
-    }
+    public int getCommentatorId() {return commentatorId;}
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    public void setCommentatorId(int commentatorId) {this.commentatorId = commentatorId;}
 
     public String getContent() {
         return content;
@@ -113,8 +109,8 @@ public class Comment implements Serializable {
         this.kids = kids;
     }
 
-    public Comment(int id, String content,int parentId,int blogId) {
-        this.id = id;
+    public Comment(int commentatorId, String content,int parentId,int blogId) {
+        this.commentatorId= commentatorId;
         this.content = content;
         this.parentId = parentId;
         this.blogId = blogId;

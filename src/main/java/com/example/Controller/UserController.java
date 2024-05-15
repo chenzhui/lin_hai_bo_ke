@@ -22,20 +22,18 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-
 @Controller
+@RequestMapping("/api")
 public class UserController {
     @Resource
     private TokenUtil tokenUtil;
@@ -63,20 +61,16 @@ public class UserController {
 
     @RequestMapping({"/Register"})
     @ResponseBody
-    public Result Register(@RequestParam("name") String name, @RequestParam("phone") String phone, @RequestParam("password") String password, @RequestParam("keys") String keys, HttpServletRequest httpServletRequest) {
-        if (phone.length() != 11)
-            return ResultUtil.success("电话位数不符");
-        if (this.service.HasPhone(phone) > 0)
-            return ResultUtil.success("该账号已被注册");
-        if (name.length() > 10)
-            return ResultUtil.success("昵称过长");
-        if (password.contains(" ") && password.length() > 12 && password.length() < 6)
-            return ResultUtil.success("密码不符合条件");
+    public Result Register(@RequestParam("name") String name, @RequestParam("phone") String phone,
+    @RequestParam("password") String password, @RequestParam("keys") String keys, HttpServletRequest httpServletRequest) {
+        if (phone.length() != 11){return ResultUtil.success("电话位数不符");}
+        if (this.service.HasPhone(phone) > 0){return ResultUtil.success("该账号已被注册");}
+        if (name.length() > 10){return ResultUtil.success("昵称过长");}
+        if (password.contains(" ") && password.length() > 12 && password.length() < 6){return ResultUtil.success("密码不符合条件");}
         HttpSession httpSession = httpServletRequest.getSession();
         String four = (String)httpSession.getAttribute(phone);
         if (keys.equals(four) || keys.equals("9999")) {
-            if (this.service.AddUser(name, phone, password) > 0)
-                return ResultUtil.success("注册成功");
+            if (this.service.AddUser(name, phone, password) > 0){return ResultUtil.success("注册成功");}
             return ResultUtil.success("系统繁忙请稍后重试");
         }
         return ResultUtil.success("验证码错误");
@@ -85,12 +79,8 @@ public class UserController {
     @RequestMapping({"Login"})
     @ResponseBody
     public Result Login(HttpServletRequest request, HttpServletResponse response, @RequestParam("phone") String phone, @RequestParam("password") String password) {
-        if (this.myListener.map.containsValue(Integer.valueOf(this.service.SearchId(phone))))
-            return ResultUtil.success("用户在别处登录");
-        System.out.println(request.getHeader("token"));
+        if (this.myListener.map.containsValue(Integer.valueOf(this.service.SearchId(phone)))){return ResultUtil.success("用户在别处登录");}
         if (request.getHeader("token")==null) {
-            System.out.println(password);
-            System.out.println(this.service.SearchPassword(phone));
             if (password.equals(this.service.SearchPassword(phone))) {
                 User user = this.service.GetUser(phone,password);
                 String token = this.tokenUtil.GetToken(user.getId(), user.getName(), user.getAvatar());
@@ -240,7 +230,7 @@ public class UserController {
         String fileName = file.getOriginalFilename();
         String suffixName = fileName.substring(fileName.lastIndexOf("."));
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-        String newFileName = "audio," + id + "," + simpleDateFormat.format(new Date()) + suffixName;
+        String newFileName = "vedio," + id + "," + simpleDateFormat.format(new Date()) + suffixName;
         File targetFile = new File(this.videoPath, newFileName);
         try {
             file.transferTo(targetFile);
@@ -317,7 +307,11 @@ public class UserController {
     @RequestMapping({"SearchBlogs"})
     @ResponseBody
     public Result SearchBlogs(@RequestParam("search") String search) {
-        return ResultUtil.success(this.service.SelectSimilarBlogs(search));
+        boolean isDigit=true;
+        for (int i = 0; i < search.length();i++) {
+            if (!Character.isDigit(search.charAt(i))){isDigit = false;}
+        }
+        return (isDigit == true) ? ResultUtil.success(this.service.SelectIntBlogs(Integer.parseInt(search)).addAll(this.service.SelectSimilarBlogs(search))) : ResultUtil.success(this.service.SelectSimilarBlogs(search));
     }
 
     @RequestMapping({"FixBlog"})
@@ -334,7 +328,7 @@ public class UserController {
     @RequestMapping({"DeleteBlog"})
     @ResponseBody
     public Result DeleteBlog(@RequestParam("blogId") int blogId, @RequestParam("id") int id) {
-        if (id == this.service.SelectAuthorById(blogId)) {
+        if (id==this.service.SelectAuthorById(blogId)){
             this.service.DeleteBlog(blogId);
             return ResultUtil.success("删除博客成功");
         }
@@ -404,9 +398,9 @@ public class UserController {
     public Result LikeBlog(@RequestParam("id") int id, @RequestParam("blogId") int blogId) {
         BlogLike blogLike = new BlogLike(id, blogId);
         if (this.service.HasBlogLike(blogLike) == 0) {
-            this.service.AddBlogLike(blogLike);
+
         } else {
-            this.service.ReduceBlogLike(blogLike);
+
         }
         Blog blog = this.service.GetBlog(blogId);
         return ResultUtil.success(blog);
@@ -422,8 +416,7 @@ public class UserController {
     @ResponseBody
     public Result Send(@RequestParam("phone") String phone, HttpServletRequest httpServletRequest) throws Exception {
         HttpSession httpSession = httpServletRequest.getSession();
-        if (phone.length() != 11)
-            return ResultUtil.success(0);
+        if (phone.length() != 11){return ResultUtil.success(0);}
         int continueTime = this.service.SearchWaitKey(phone);
         if (continueTime == 0 || continueTime > 60) {
             RandomFourUtil randomFourUtil = new RandomFourUtil();
@@ -440,10 +433,8 @@ public class UserController {
 
         @RequestMapping({"InsertKind"})
         @ResponseBody
-        public Result InsertKind(@RequestParam("kind") String kind, HttpServletRequest request) {
-            String token = request.getHeader("token");
-            Map<String, String> map = this.tokenUtil.parseToken(token);
-            if (((String)map.get("id")).equals("1")) {
+        public Result InsertKind(@RequestParam("kind") String kind,@RequestParam("id") int id,HttpServletRequest request) {
+            if(id==1){
                 this.service.InsertKind(kind);
                 return ResultUtil.success("插入类别成功");
             }
@@ -458,10 +449,8 @@ public class UserController {
 
         @RequestMapping({"DeleteKind"})
         @ResponseBody
-        public Result DeleteKind(@RequestParam("kind") String kind, HttpServletRequest request) {
-            String token = request.getHeader("token");
-            Map<String, String> map = this.tokenUtil.parseToken(token);
-            if (((String)map.get("id")).equals("1")) {
+        public Result DeleteKind(@RequestParam("kind") String kind,@RequestParam("id") int id, HttpServletRequest request) {
+            if (id==1){
                 this.service.DeleteKind(kind);
                 return ResultUtil.success("删除类别成功");
             }
@@ -471,25 +460,30 @@ public class UserController {
         @RequestMapping({"InsertLetter"})
         @ResponseBody
         public Result InsertLetter(@RequestParam("id1") int id1, @RequestParam("id2") int id2, @RequestParam("content") String content, @RequestParam("towardId") int towardId) {
-            if (id1 < id2)
-                return ResultUtil.success(this.service.InsertLetter(new Letter(id1, id2, content, towardId)));
-            return ResultUtil.success(this.service.InsertLetter(new Letter(id2, id1, content, towardId)));
+            String id1Name=this.service.GetName(id1);
+            String id2Name=this.service.GetName(id2);
+            return ResultUtil.success(this.service.InsertLetter(new Letter(0,id1,id2,id1Name,id2Name,content, towardId)));
         }
 
         @RequestMapping({"SelectLetters"})
         @ResponseBody
         public Result SelectLetters(@RequestParam("id1") int id1, @RequestParam("id2") int id2) {
-            if (id1 < id2)
-                return ResultUtil.success(this.service.SelectLetters(id1, id2));
-            return ResultUtil.success(this.service.SelectLetters(id2, id1));
+            return ResultUtil.success(this.service.SelectLetters(id1, id2));
+        }
+
+        @RequestMapping("SelectAllLetters")
+        @ResponseBody
+        public Result SelectAllLetters(@RequestParam("towardId")int towardId){
+            return ResultUtil.success(this.service.SelectAllLetters(towardId));
         }
 
         @RequestMapping({"InsertCollection"})
         @ResponseBody
         public Result InsertCollection(@RequestParam("id") int authorId, @RequestParam("blogId") int blogId) {
             Collection collection = new Collection(authorId, blogId);
-            if (this.service.SelectCollection(collection) == 0)
+            if (this.service.SelectCollection(collection) == 0){
                 return ResultUtil.success(this.service.InsertCollection(collection));
+            }
             return ResultUtil.success(this.service.DeleteCollection(collection));
         }
 
@@ -510,9 +504,35 @@ public class UserController {
             return ResultUtil.success(blogs);
         }
 
-        @RequestMapping({"Test"})
+        @RequestMapping("InsertFollow")
         @ResponseBody
-        public String Test() {
-            return "gg";
+        public Result InterestFollow(@RequestParam("followerId") int followerId,@RequestParam("followedId")int followedId){
+            return ResultUtil.success(this.service.InsertFollow(followerId,followedId));
         }
+
+        @RequestMapping("SelectFollow")
+        @ResponseBody
+        public Result SelectFollow(@RequestParam("followerId") int followerId){
+            return ResultUtil.success(this.service.SelectFollowed(followerId));
+        }
+        @RequestMapping("NotifiyFollower")
+        @ResponseBody
+        public Result NotifiyFollower(@RequestParam("followedId")int followedId){
+            int[] followerIds=this.service.SelectFollower(followedId);
+            for(int i=0;i<followerIds.length;i++){
+                this.service.InsertLetter(new Letter(0,0,followerIds[i],"",this.service.GetName(followerIds[i]),"您关注的博主更新了",followedId));
+            }
+            return ResultUtil.success(1);
+        }
+    @RequestMapping("Test")
+    @ResponseBody
+    public List<Integer> Test(){
+        List<Integer> l1=new ArrayList<Integer>();
+        l1.add(1);
+        List<Integer> l2=new ArrayList<Integer>();
+        l1.add(2);
+        l2.add(3);
+        l1.addAll(l2);
+        return l1;
     }
+}

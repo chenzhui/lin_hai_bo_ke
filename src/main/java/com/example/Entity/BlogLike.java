@@ -3,22 +3,19 @@ package com.example.Entity;
 public class BlogLike {
     private int blogId;
 
-    private int id;
+    private int likerId;
 
     public int getBlogId() {
         return this.blogId;
     }
 
-    public int getId() {return id;}
+    public void setBlogId(int blogId) {this.blogId = blogId;}
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    public int getLikerId() {return likerId;}
 
-    public BlogLike(int id, int blogId) {
-        this.blogId = blogId;
-        this.id = id;
-    }
+    public void setLikerId(int likerId) {this.likerId = likerId;}
+
+    public BlogLike(int likerId, int blogId) {this.blogId = blogId;this.likerId = likerId;}
 
     public BlogLike() {}
 }

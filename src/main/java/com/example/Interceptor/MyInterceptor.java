@@ -18,8 +18,7 @@ public class MyInterceptor implements HandlerInterceptor {
 
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object object) throws Exception {
         System.out.println(request.getRequestURL());
-        if (object.toString().equals("ParameterizableViewController [view=\"forward:index.html\"]"))
-            return true;
+        if (object.toString().equals("ParameterizableViewController [view=\"forward:index.html\"]")){return true;}
         String token = request.getHeader("token");
         if (token == null) {
             response.setStatus(401);

@@ -79,13 +79,13 @@
 
 
     <select id="HasBlogLike" resultType="int">
-        select count(*) as amount from bloglikeform where id=#{id} and blogId=#{blogId}
+        select count(*) as amount from bloglikeform where likerId=#{likerId} and blogId=#{blogId}
     </select>
     <insert id="LikeBlog">
-        insert into bloglikeform(id,blogId) values(#{id},#{blogId});
+        insert into bloglikeform(likerId,blogId) values(#{likerId},#{blogId});
     </insert>
     <delete id="DislikeBlog">
-        delete from bloglikeform where id=#{id} and blogId=#{blogId}
+        delete from bloglikeform where likerId=#{likerId} and blogId=#{blogId}
     </delete>
     <update id="BlogLikeAdd">
         update blog set liked=liked+1 where blogId=#{blogId}
@@ -96,19 +96,19 @@
 
 
     <insert id="AddComment">
-        insert into comment(cmtId,authorId,content,birthTime,liked,parentId,blogId,kids) values(0,#{authorId},#{content},now(),0,null,#{blogId},0)
+        insert into comment(cmtId,commentatorId,content,birthTime,liked,parentId,blogId,kids) values(0,#{commentatorId},#{content},now(),0,null,#{blogId},0)
     </insert>
     <insert id="AddChildComment">
-        insert into comment(cmtId,authorId,content,birthTime,liked,parentId,blogId,kids) values(0,#{authorId},#{content},now(),0,#{parentId},#{blogId},null)
+        insert into comment(cmtId,commentatorId,content,birthTime,liked,parentId,blogId,kids) values(0,#{commentatorId},#{content},now(),0,#{parentId},#{blogId},null)
     </insert>
     <update id="AddKids">
         update comment set kids=kids+1 where cmtId=#{parentId}
     </update>
     <select id="GetComment" resultType="com.example.Entity.Comment">
-        select cmtId,id,content,birthTime,liked,blogId,kids from comment where parentId is null and blogId=#{blogId}
+        select cmtId,commentatorId,content,birthTime,liked,blogId,kids from comment where parentId is null and blogId=#{blogId}
     </select>
     <select id="GetChildComment" resultType="com.example.Entity.Comment">
-        select cmtId,id,content,birthTime,liked,parentId,blogId from comment where parentId=#{parentId}
+        select cmtId,commentatorId,content,birthTime,liked,parentId,blogId from comment where parentId=#{parentId}
     </select>
     <select id='GetCommentByCmtId' resultType="com.example.Entity.Comment">
         select * from comment where cmtId=#{cmtId}
@@ -116,13 +116,13 @@
 
 
     <select id="HasCommentLike" resultType="int">
-        select count(*) as amount from commentlikeform where id=#{id} and cmtId=#{cmtId}
+        select count(*) as amount from commentlikeform where likerId=#{likerId} and cmtId=#{cmtId}
     </select>
     <insert id="LikeComment">
-        insert into commentlikeform(id,cmtId) values(#{id},#{cmtId})
+        insert into commentlikeform(likerId,cmtId) values(#{likerId},#{cmtId})
     </insert>
     <delete id="DislikeComment">
-        delete from commentlikeform where id=#{id} and cmtId=#{cmtId}
+        delete from commentlikeform where likerId=#{likerId} and cmtId=#{cmtId}
     </delete>
     <update id="CommentLikeAdd">
         update comment set liked=liked+1 where cmtId=#{cmtId}
@@ -152,10 +152,13 @@
 
 
     <insert id="InsertLetter">
-        insert into letter(letterId,smallId,bigId,happendTime,content,towardId) values(0,#{smallId},#{bigId},now(),#{content},#{towardId})
+        insert into letter(letterId,id1,id2,id1Name,id2Name,happendTime,content,towardId) values(0,#{id1},#{id2},#{id1Name},#{id2Name},now(),#{content},#{towardId})
     </insert>
     <select id="SelectLetters" resultType="com.example.Entity.Letter">
-        select letterId,time,content,towardId from letter where smallId=#{smallId} and bigId=#{bigId}
+        select * from letter where id1=#{id1} and id2=#{id2} or id1=#{id2} and id2=#{id1}
+    </select>
+    <select id="SelectAllLetters" resultType="com.example.Entity.Letter">
+        select * from letter where towardId=#{towardId}
     </select>
 
 
@@ -171,6 +174,17 @@
     <select id="SelectCollectionsById" resultType="int">
         select blogId from collection where id=#{id}
     </select>
+
+    <insert id="InsertFollow">
+        insert  into follow(followerId,followedId) value(#{followerId},#{followeredId})
+    </insert>
+    <select id="SelectFollowed" resultType="int">
+        select followedId from follow where followerId=#{followerId};
+    </select>
+    <select id="SelectFollower" resultType="int">
+        select followerId from follow where followedId=#{followerId};
+    </select>
+
 
 
 </mapper>

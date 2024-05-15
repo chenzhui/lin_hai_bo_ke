@@ -47,6 +47,7 @@ public interface UserService {
 
     List<Blog> GetTypeBlogs(String type);
 
+    List<Blog> SelectIntBlogs(int search);
     List<Blog> SelectSimilarBlogs(String search);
 
     int SelectAuthorById(int blogId);
@@ -69,11 +70,17 @@ public interface UserService {
 
     int HasBlogLike(BlogLike blogLike);
 
-    int AddBlogLike(BlogLike blogLike);
+    int LikeBlog(BlogLike blogLike);
+    int AddBlogLike(int blogId);
+    int DislikeBlog(BlogLike blogLike);
+    int ReduceBlogLike(int blogId);
 
-    int ReduceBlogLike(BlogLike blogLike);
 
-    int HasCommentLike(int id,int cmtId);
+    int HasCommentLike(int likerId,int cmtId);
+
+    int DisLikeComment(CommentLike commentLike);
+
+    int LikeComment(CommentLike commentLike);
 
     int AddCommentLike(CommentLike commentLike);
 
@@ -91,7 +98,8 @@ public interface UserService {
 
     int InsertLetter(Letter letter);
 
-    List<Letter> SelectLetters(int small, int bigId);
+    List<Letter> SelectLetters(int id1, int id2);
+    List<Letter> SelectAllLetters(int towardId);
 
     int InsertCollection(Collection collection);
 
@@ -100,4 +108,11 @@ public interface UserService {
     int SelectCollection(Collection collection);
 
     int[] SelectCollectionsById(int authorId);
+
+    int InsertFollow(int followerId,int followedId);
+
+    int[] SelectFollowed(int followerId);
+
+    int[] SelectFollower(int followerId);
+
 }

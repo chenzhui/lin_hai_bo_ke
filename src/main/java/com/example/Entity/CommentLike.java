@@ -3,10 +3,10 @@ package com.example.Entity;
 public class CommentLike {
     private int cmtId;
 
-    private int id;
+    private int likerId;
 
-    public CommentLike(int cmtId, int authorId) {
-        this.id = authorId;
+    public CommentLike(int cmtId, int likerId) {
+        this.likerId = likerId;
         this.cmtId = cmtId;
     }
 
@@ -20,11 +20,7 @@ public class CommentLike {
         this.cmtId = cmtId;
     }
 
-    public int getId() {
-        return id;
-    }
+    public int getLikerId() {return likerId;}
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    public void setLikerId(int likerId) {this.likerId = likerId;}
 }
