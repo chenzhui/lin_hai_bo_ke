@@ -1,5 +1,6 @@
 package com.example.Listener;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpSessionEvent;
@@ -8,11 +9,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MyListener implements HttpSessionListener {
-    public Map<String, String> map = new HashMap<>();
+    public Map<Integer, Date> map = new HashMap<>();
 
-    public void sessionCreated(HttpSessionEvent se) {}
+    public void sessionCreabhted(HttpSessionEvent se){
+    //    this.map.put(se.getSession().getId(),)
+    };
 
-    public void sessionDestroyed(HttpSessionEvent se) {
+    /*public void sessionDestroyed(HttpSessionEvent se) {
         this.map.remove(se.getSession().getId());
-    }
+    }*/
 }

@@ -7,8 +7,6 @@ import java.util.List;
 import com.example.Server.ChatRoomServerEndpoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.*;
@@ -27,7 +25,7 @@ public class Myconfig implements WebMvcConfigurer {
 
     /*public void addInterceptors(InterceptorRegistry registry) {
         List<String> excludes = new ArrayList<>();
-        /*String[] a = {"/Login", "/SelectKinds", "/SelectKinds", "/GetAllBlogs", "/Register", "/Send", "/GetComment", "/GetBlog", "/GetTypeBlogs", "/error", "/InsertKind", "/DeleteKind", "/SearchBlogs", "/GetOwnerBlogs", "/GetNameById", "/GetAvatarById", "/static/**", "/avatar/**", "/css/**", "/js/**", "/picture/**", "/jsp/**", "/video/**", "/index.html", "/ReleaseBlog",  "/","UploadAvatar","/Index" };
+        String[] a = {"/Login", "/SelectKinds", "/SelectKinds", "/GetAllBlogs", "/Register", "/Send", "/GetComment", "/GetBlog", "/GetTypeBlogs", "/error", "/InsertKind", "/DeleteKind", "/SearchBlogs", "/GetOwnerBlogs", "/GetNameById", "/GetAvatarById", "/static/**", "/avatar/**", "/css/**", "/js/**", "/picture/**", "/jsp/**", "/video/**", "/index.html", "/ReleaseBlog",  "/","UploadAvatar", };
         for (int i = 0; i < a.length; ) {
             excludes.add(a[i]);
             i++;
@@ -35,6 +33,7 @@ public class Myconfig implements WebMvcConfigurer {
 
         registry.addInterceptor((HandlerInterceptor)GetMyInterceptor()).addPathPatterns("/*").excludePathPatterns(excludes);
     }*/
+
     @Bean
     public ServerEndpointExporter serverEndpointExporter(){
         return new ServerEndpointExporter();

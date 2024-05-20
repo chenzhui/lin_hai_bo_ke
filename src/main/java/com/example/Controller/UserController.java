@@ -14,6 +14,7 @@ import com.example.Entity.User;
 import com.example.Listener.MyListener;
 import com.example.Result.Result;
 import com.example.Service.UserService;
+import com.example.utils.Protect_Login_Util;
 import com.example.utils.RandomFourUtil;
 import com.example.utils.ResultUtil;
 import com.example.utils.TokenUtil;
@@ -27,6 +28,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,23 +38,18 @@ import org.springframework.web.multipart.MultipartFile;
 @Controller
 @RequestMapping("/api")
 public class UserController {
-    @Resource
+    @Autowired  //按类型注入,@Resouce则是按名称注入
     private TokenUtil tokenUtil;
 
-    @Resource
+    @Autowired
     private UserService service;
 
-    @Resource
+    @Autowired
     private MyListener myListener;
+    @Autowired
+    private Protect_Login_Util protectLoginUtil;
 
-    private String avatarPath = "/www/server/tomcat9/webapps/avatar";
-
-    private String picturePath = "/www/server/tomcat9/webapps/picture";
-    //private String picturePath = "C:/website/picture";
-
-    private String videoPath = "/www/server/tomcat9/webapps/video";
-
-    private String audioPath = "/www/server/tomcat9/webapps/audio";
+    private String avatarPath = "/www/server/tomcat9/webapps/avatar";private String picturePath = "/www/server/tomcat9/webapps/picture";private String videoPath = "/www/server/tomcat9/webapps/video";private String audioPath = "/www/server/tomcat9/webapps/audio";
 
     public static Client createClient(String accessKeyId, String accessKeySecret) throws Exception {
         Config config = (new Config()).setAccessKeyId(accessKeyId).setAccessKeySecret(accessKeySecret);
@@ -79,27 +77,18 @@ public class UserController {
     @RequestMapping({"Login"})
     @ResponseBody
     public Result Login(HttpServletRequest request, HttpServletResponse response, @RequestParam("phone") String phone, @RequestParam("password") String password) {
-        if (this.myListener.map.containsValue(Integer.valueOf(this.service.SearchId(phone)))){return ResultUtil.success("用户在别处登录");}
+        int id=this.service.SearchId(phone);
+        if(this.protectLoginUtil.CheckLoginRecord(id)){return ResultUtil.success("用户在别处登录");}
         if (request.getHeader("token")==null) {
             if (password.equals(this.service.SearchPassword(phone))) {
                 User user = this.service.GetUser(phone,password);
                 String token = this.tokenUtil.GetToken(user.getId(), user.getName(), user.getAvatar());
-                Cookie cookie = new Cookie("token", token);
-                cookie.setPath("/");
-                cookie.setMaxAge(259200);
-                Cookie cookie1 = new Cookie("id", "" + user.getId());
-                cookie1.setPath("/");
-                cookie1.setMaxAge(259200);
-                Cookie cookie2 = new Cookie("name", user.getName());
-                cookie2.setPath("/");
-                cookie2.setMaxAge(259200);
-                Cookie cookie3 = new Cookie("avatar", user.getAvatar());
-                cookie3.setPath("/");
-                cookie3.setMaxAge(259200);
-                response.addCookie(cookie);
-                response.addCookie(cookie1);
-                response.addCookie(cookie2);
-                response.addCookie(cookie3);
+                Cookie cookie = new Cookie("token", token);cookie.setPath("/");cookie.setMaxAge(259200);//以秒为单位
+                Cookie cookie1 = new Cookie("id", "" + user.getId());cookie1.setPath("/");cookie1.setMaxAge(259200);
+                Cookie cookie2 = new Cookie("name", user.getName());cookie2.setPath("/");cookie2.setMaxAge(259200);
+                Cookie cookie3 = new Cookie("avatar", user.getAvatar());cookie3.setPath("/");cookie3.setMaxAge(259200);
+                response.addCookie(cookie);response.addCookie(cookie1);response.addCookie(cookie2);response.addCookie(cookie3);
+                this.protectLoginUtil.AddLoginRecord(id);
                 return ResultUtil.success("登录成功");
             }
             return ResultUtil.success("密码错误");
@@ -121,20 +110,14 @@ public class UserController {
 
     @RequestMapping({"Logout"})
     @ResponseBody
-    public Result Logout(HttpServletRequest httpServletRequest, HttpServletResponse response) {
-        Cookie cookie = new Cookie("token", null);
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        Cookie cookie1 = new Cookie("id", null);
-        cookie1.setPath("/");
-        cookie1.setMaxAge(0);
-        Cookie cookie2 = new Cookie("avatar", null);
-        cookie2.setPath("/");
-        cookie2.setMaxAge(0);
-        response.addCookie(cookie);
-        response.addCookie(cookie1);
-        response.addCookie(cookie2);
-        return ResultUtil.success("推出成功");
+    public Result Logout(@RequestParam("id") int id, HttpServletResponse response) {
+        Cookie cookie = new Cookie("token", null);cookie.setMaxAge(0);cookie.setPath("/");
+        Cookie cookie1 = new Cookie("id", null);cookie1.setPath("/");cookie1.setMaxAge(0);
+        Cookie cookie2 = new Cookie("name", null);cookie2.setPath("/");cookie2.setMaxAge(259200);
+        Cookie cookie3 = new Cookie("avatar", null);cookie2.setPath("/");cookie2.setMaxAge(0);
+        response.addCookie(cookie);response.addCookie(cookie1);response.addCookie(cookie2);response.addCookie(cookie3);
+        this.protectLoginUtil.DeleteLoginRecord(id);
+        return ResultUtil.success("退出成功");
     }
 
     @RequestMapping({"ChangeName"})
@@ -526,13 +509,9 @@ public class UserController {
         }
     @RequestMapping("Test")
     @ResponseBody
-    public List<Integer> Test(){
-        List<Integer> l1=new ArrayList<Integer>();
-        l1.add(1);
-        List<Integer> l2=new ArrayList<Integer>();
-        l1.add(2);
-        l2.add(3);
-        l1.addAll(l2);
-        return l1;
+    public void Test(){
+        Date date=new Date();
+        System.out.println(date.getTime());
+        System.out.println(date.toString());
     }
 }
